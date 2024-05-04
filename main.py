@@ -1,0 +1,13 @@
+from pyyoutube import Api
+# api = Api(api_key="")
+api = Api(access_token='')
+api = Api(client_id="", client_secret="")
+print(api.get_authorization_url())
+api.generate_access_token(authorization_response="https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=994151002990-lbkfnunnbh7646fagac1r48k7t5rusut.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Flocalhost%2F&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&state=PyYouTube&access_type=offline&prompt=select_account")
+# api = Api(api_key="")
+# api = Api(access_token='')
+# print(channel_by_id)
+# print(channel_by_id.items)
+# print(channel_by_id.items[0].to_dict())
+# laylists_by_mine = api.get_playlists(mine=True)
+# print(playlists_by_mine)
