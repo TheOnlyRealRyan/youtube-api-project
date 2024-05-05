@@ -15,6 +15,10 @@ def main():
     
     
 def combine_audio_and_video() -> None:
+    """
+    # TODO: this module finds the highest quality video track and audio track and combines them because pytube.get_highest_resolution() is broken
+    """
+    
     video_directory = "./video_track"
     filePattern = "*.*"
     #TODO: Ping pong between directories and combine tracks
