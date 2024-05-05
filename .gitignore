@@ -1,2 +1,7 @@
 .venv
 my_secret.json
+client_secret_web.json
+downloads
+processed_folder
+audio_track
+video_track
