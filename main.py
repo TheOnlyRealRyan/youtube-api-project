@@ -5,64 +5,53 @@ import ffmpeg
 import re
 import os
 import fnmatch 
+import pathlib
+import subprocess    
 
-
-def main():
-    # playlists()
-    combine_audio_and_video()
-    # download_playlist()
-    # download_video()
     
     
 def combine_audio_and_video() -> None:
     """
     # TODO: this module finds the highest quality video track and audio track and combines them because pytube.get_highest_resolution() is broken
     """
-    
     video_directory = "./video_track"
     filePattern = "*.*"
-    #TODO: Ping pong between directories and combine tracks
+    
+    # video_directory_path = "./video_track"
+    # video_directory = pathlib.PureWindowsPath(video_directory_path).as_posix()
+    
+    for path, dirs, files in os.walk(os.path.abspath(video_directory)):
+        for filename in fnmatch.filter(files, filePattern):
+            for apath, adirs, afiles in os.walk(os.path.abspath(video_directory)):
+                for afilename in fnmatch.filter(afiles, filePattern):         
+                    
+                    print(f"first: {filename}")
+                    print(f"Second: {afilename}")
+                    
+                    aud = afilename.strip("audio_")
+                    aud2 = aud.strip(".webm")
+                    
+                    vid = filename.strip("video_")
+                    vid2 = vid.strip(".mp4")
 
-    # Find Audio track
-    audio_directory = "./audio_track"
-    for path, dirs, files in os.walk(os.path.abspath(audio_directory)):
-        for afilename in fnmatch.filter(files, filePattern):
-            
-            aud = afilename.strip("audio_")
-
-            print(afilename)
-            print(aud)
-
-            # TODO: Compare stripped aud and vid and then combine the two if equal
-            """
-            if len(aud)> 0:
-                input_audio = ffmpeg.input(f'./downloads/{afilename}')
-                # print("-->" +  aud[0])
-            
-                # Find the matching video file
-                for path, dirs, files in os.walk(os.path.abspath(video_directory)):
-                    for vfilename in fnmatch.filter(files, filePattern):
-                        # print(filename)
-                        vid = re.findall('video_*', vfilename)
-                        if len(vid)> 0:
-                            input_video = ffmpeg.input(f'./downloads/{vfilename}')
-                            # print(vid)
-                    print(afilename)
-                    print(vfilename)
-                    if afilename == vfilename:
-                        print("here")   
+                    # TODO: Compare stripped aud and vid and then combine the two if equal
+                    if aud2 == vid2:
+                        print(f"Compare: {aud2} - {vid2}")
+                        print(f"File: {afilename} - {filename}")
+                        print((f'./audio_track/{afilename}'))
                         
-            """
-      
+                        input_video = ffmpeg.input(f'./video_track/{afilename}')
+                        input_audio = ffmpeg.input(f'./video_track/{filename}')
+                        
+                        # print(filename, afilename)
+                        # subprocess.run(f"ffmpeg -i ./video_track/{filename} -i ./video_track/{afilename} -c:v copy -c:a aac {vid2}.mp4")
+                        print(f'\"./processed_folder/{filename}\"')
+                        ffmpeg.concat(input_video, input_audio, v=1, a=1).output(f'\"./processed_folder/{filename}\"').run()
+
     """
-    ffmpeg.concat(input_video, input_audio, v=1, a=1).output('./processed_folder/finished_video.mp4').run()            
-    """            
-                
-    """
+    # Combining Audio and Video Code
     input_video = ffmpeg.input(re.findall('./downloads/video_(*).mp4'))
-
     input_audio = ffmpeg.input(re.findall('./downloads/audio_(*).(*))'))
-
     ffmpeg.concat(input_video, input_audio, v=1, a=1).output('./processed_folder/finished_video.mp4').run()
     """
 
@@ -100,10 +89,11 @@ def download_playlist() -> None:
             # print(f"Resolution: {video.streams.get_highest_resolution()}")
             # video.streams.get_highest_resolution().download(path)
             
-            
-            print(f"Resolution: {video.streams.filter(progressive=False, file_extension='mp4').order_by('resolution').desc().first()}")
-            video.streams.filter(progressive=False, file_extension='mp4').order_by('resolution').desc().first().download(filename_prefix="video_", output_path=video_path)
-            video.streams.filter(only_audio=True, progressive=False).desc().first().download(filename_prefix="audio_", output_path=audio_path)
+            # print(f"Resolution: {video.streams.filter(progressive=False, file_extension='mp4').order_by('resolution').desc().first()}")
+            print("-->Downloading Video Track...")
+            video.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first().download(filename_prefix="video_", output_path=video_path)
+            print("-->Downloading Audio Track...")
+            video.streams.filter(only_audio=True, progressive=False).desc().first().download(filename_prefix="audio_", output_path=video_path)
 
     except Exception as e: 
         print(f"Error {str(e)}")
@@ -121,6 +111,13 @@ def download_video() -> None:
     except Exception as e: 
         print(f"Error {str(e)}")
 
+
+def main():
+    # display_playlists()
+    combine_audio_and_video()
+    # download_playlist()
+    # download_video()  
+    
     
 if __name__ == "__main__":
     main()
