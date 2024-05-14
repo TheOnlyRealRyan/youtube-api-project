@@ -8,11 +8,67 @@ import fnmatch
 import pathlib
 import subprocess    
 
-    
+def combine_audio_and_video(video_path: str, audio_path: str, output_path: str):
+    """
+    This funciton combines the highest quality video track 
+    and audio track and combines them because 
+    pytube.get_highest_resolution() is broken
+
+    Args:
+        video_path (str): path to video file
+        audio_path (str): path to audio file
+        output_path (str): _description_
+    """
+    ffmpeg_path = 'C:/ffmpeg/bin/ffmpeg.exe' # Your path to ffmpeg here
+    try:
+        # Construct the ffmpeg command
+        command = [
+            ffmpeg_path,
+            '-i', video_path,  # Input video file
+            '-i', audio_path,  # Input audio file
+            '-c:v', 'copy',    # Copy the video codec
+            '-c:a', 'libvorbis',     # Use libvorbis codec for mpeg files
+            # '-strict', 'experimental',  # Allow experimental AAC codec
+            output_path  # Output file path
+        ]
+        
+        # Run the command
+        subprocess.run(command, check=True)
+        print(f'Successfully combined video and audio into {output_path}')
+    except subprocess.CalledProcessError as e:
+        print(f'Error occurred: {e}')
+
+
+def navigate_folders(video_directory: str, vfilePattern: str,afilePattern: str) -> str:
+    """_summary_
+
+    Args:
+        video_directory (str): _description_
+        vfilePattern (str): _description_
+        afilePattern (str): _description_
+
+    Returns:
+        str: _description_
+    """
+
+    for path, dirs, files in os.walk(os.path.abspath(video_directory)):
+        for filename in fnmatch.filter(files, vfilePattern): 
+            for apath, adirs, afiles in os.walk(os.path.abspath(video_directory)):
+                for afilename in fnmatch.filter(afiles, afilePattern): 
+                    # print(afilename)
+                    # print(files, afiles)
+                    # print("-------"+ filename.strip("video_*.mp4",))
+                    if filename.strip("video_*.mp4") == afilename.strip("audio_*.webm"):
+                        
+                        # print("------------", filename, afilename)
+                        yield filename, afilename
+                    else:
+                        yield 0
+
     
 def combine_audio_and_video() -> None:
     """
-    # TODO: this module finds the highest quality video track and audio track and combines them because pytube.get_highest_resolution() is broken
+    # TODO: 
     """
     video_directory = "./video_track"
     filePattern = "*.*"
@@ -113,9 +169,26 @@ def download_video() -> None:
 
 
 def main():
+    
+    # Combine Audio and Video
+    video_directory = "./video_track"
+    vfilePattern = "*.mp4"
+    afilePattern = "*.webm" 
+    for value in navigate_folders(video_directory,vfilePattern, afilePattern):
+        if value != 0:
+            print(f"---> Combining Tracks: {value[0]} - {value[1]}")
+            path1 = f"video_track/{value[0]}"
+            path2 = f"video_track/{value[1]}"
+            output_path = f"processed_folder/{value[0].strip("video_")}"
+            combine_audio_and_video(path1, path2, output_path)
+    
+    # Display Video Titles in a Playlist
     # display_playlists()
-    combine_audio_and_video()
+    
+    # Download Video and Audio Tracks Seperataly from a playlist
     # download_playlist()
+    
+    # Download an individual video using a link 
     # download_video()  
     
     
